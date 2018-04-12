@@ -1,0 +1,130 @@
+{include file='public@inc:header' /}
+</head>
+
+<body style="background-color: #f3f3f4;">
+
+<!-- 子菜单列表 -->
+<div class="margin clearfix">
+    <div class="Guestbook_style">
+
+        <div class="Guestbook_list" id="user_table">
+            <table class="table table-striped table-bordered table-hover" id="sample-table">
+                <thead>
+                <tr>
+                    <th width="80px">编号</th>
+                    <th width="80px">应用</th>
+                    <th width="120px">名称</th>
+                    <th width="150px">操作</th>
+                </tr>
+                </thead>
+                <tbody>
+                {foreach name="aMenu" item="vo"}
+                    <tr>
+                        <td>{$vo.id}</td>
+                        <td>{$vo.module}/{$vo.action}</td>
+                        <td>{$vo.name}</td>
+                        <td class="td-manage">
+                            <a onClick="editMenu({$vo.id}, '{$vo.name}')"  href="javascript:;" title="修改"  class="btn btn-xs btn-info">修改</a>
+							<a onClick="delMenu({$vo.id})"  href="javascript:;" title="删除"  class="btn btn-xs btn-warning">删除</a>
+                        </td>
+                    </tr>
+                {/foreach}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    function editMenu(id, name){
+		var content = '/menu/' +id+ '/editMenu';
+        layer.open({
+            type: 2,
+            title: name + '-修改菜单',
+            area: ['600px', '400px'],
+            content: content,
+			maxmin: true,
+			btn: ['修改', '取消'],
+			/*success:function(layero, index){
+				var body = layer.getChildFrame('body', index);
+				var iframeWin = window[layero.find('iframe')[0]['name']]; //得到iframe页的窗口对象，执行iframe页的方法：iframeWin.method();
+				console.log(body.html()) //得到iframe页的body内容
+				body.find('input').val('Hi，我是从父页来的')
+            },*/
+			yes:function(index, layero){
+				//获取iframe的body元素 
+				var body = layer.getChildFrame('body', index);
+				//得到iframe页的窗口对象，执行iframe页的方法：iframeWin.method();
+				var iframeWin = window[layero.find('iframe')[0]['name']];
+				//执行iframe页的showMsg方法  
+				//iframeWin.showMsg("mercy");
+				
+				var query = new Object();
+				query.name = body.find('input[name="name"]').val();
+				query.module = body.find('input[name="module"]').val();
+				query.controller = body.find('input[name="controller"]').val();
+				query.action = body.find('input[name="action"]').val();
+				query._method = 'PUT';
+				
+				$.post('/menu/'+id, query, function(res){
+                    if(res.code){
+                        location.reload();
+                    }else{
+                        layer.alert(res.message, {title: '提示框', icon:2,});
+                    }
+                }, "json");
+				
+			}
+        });
+    }
+	
+	function delMenu(id){
+        layer.confirm('确认要删除此菜单？',function(){
+            $.post("/menu", {id:id, '_method':'DELETE'}, function(res){
+                if(res.code){
+                    location.reload();
+                }else{
+                    layer.alert(res.message, {title: '提示框', icon:2});
+                }
+            });
+        });
+    }
+</script>
+
+<!--表格设置-->
+<script type="text/javascript">
+    jQuery(function($) {
+        var oTable1 = $('#sample-table').dataTable( {
+            "bStateSave": true,//状态保存
+            "aoColumnDefs": [
+                //{"bVisible": false, "aTargets": [ 3 ]} //控制列的隐藏显示
+                {"orderable":false,"aTargets":[0,1,2,3]}// 制定列不参与排序
+            ] } );
+
+        $('table th input:checkbox').on('click' , function(){
+            var that = this;
+            $(this).closest('table').find('tr > td:first-child input:checkbox')
+                .each(function(){
+                    this.checked = that.checked;
+                    $(this).closest('tr').toggleClass('selected');
+                });
+        });
+
+        $('[data-rel="tooltip"]').tooltip({placement: tooltip_placement});
+        function tooltip_placement(context, source) {
+            var $source = $(source);
+            var $parent = $source.closest('table')
+            var off1 = $parent.offset();
+            var w1 = $parent.width();
+
+            var off2 = $source.offset();
+            var w2 = $source.width();
+
+            if( parseInt(off2.left) < parseInt(off1.left) + parseInt(w1 / 2) ) return 'right';
+            return 'left';
+        }
+    })
+</script>
+</body>
+
+</html>

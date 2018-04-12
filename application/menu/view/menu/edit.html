@@ -1,0 +1,77 @@
+{include file='public@inc:header' /}
+</head>
+
+<body>
+
+<div class="edit_menber" style="margin-top:20px;">
+    <form id="editMenuForm">
+        <div class="form-group">
+            <label class="form-label">上级:</label>
+            <div class="formControls">
+                <select class="form-control" name="parent_id" style="width:160px;margin-left: 10px;">
+                    <option value="{$sMenu.id}">{$sMenu.name}</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="form-label"><span class="c-red">*</span>名称：</label>
+            <div class="formControls">
+                <input type="text" class="input-text" value="{$eMenu.name}" placeholder="" id="name" name="name">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="form-label">应用：</label>
+            <div class="formControls">
+                <input type="text" placeholder="" name="module" autocomplete="off" value="{$eMenu.module}" class="input-text" id="module">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="form-label">模块：</label>
+            <div class="formControls">
+                <input type="text" class="input-text" value="{$eMenu.controller}" placeholder="" id="controller" name="controller">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="form-label"><span class="c-red">*</span>方法：</label>
+            <div class="formControls">
+                <input type="text" placeholder="" name="action" autocomplete="off" value="{$eMenu.action}" class="input-text" id="action">
+            </div>
+        </div>
+		<div class="center">
+			<input type="hidden" name="_method" value="PUT">
+		</div>
+    </form>
+</div>
+
+</body>
+</html>
+
+<script type="text/javascript">
+    $(function() {
+        $("#administrator").fix({
+            float : 'left',
+            //minStatue : true,
+            skin : 'green',
+            durationTime :false,
+            spacingw:50,//设置隐藏时的距离
+            spacingh:270,//设置显示时间距
+        });
+    });
+
+    //初始化宽度、高度
+    $(".widget-box").height($(window).height()-215);
+    $(".table_menu_list").width($(window).width()-260);
+    $(".table_menu_list").height($(window).height()-215);
+    //当文档窗口发生改变时 触发
+    $(window).resize(function(){
+        $(".widget-box").height($(window).height()-215);
+        $(".table_menu_list").width($(window).width()-260);
+        $(".table_menu_list").height($(window).height()-215);
+    })
+	
+	// 供父类调用
+    function showMsg(msg){  
+        layer.msg(msg);  
+    }
+
+</script>

@@ -1,0 +1,279 @@
+{include file='public@inc:header' /}
+</head>
+
+<body>
+<div class="margin clearfix">
+    <div class="Guestbook_style">
+        <div class="border clearfix">
+       <span class="l_f">
+        <a href="javascript:void()" id="administrator_add" class="btn btn-warning"><i class="fa fa-plus"></i> 添加管理员</a>
+       </span>
+        </div>
+
+        <div class="Guestbook_list" id="user_table">
+            <table class="table table-striped table-bordered table-hover" id="sample-table">
+                <thead>
+                <tr>
+                    <th width="80px">编号</th>
+                    <th width="80px">登录名</th>
+                    <th width="120px">登录时间</th>
+                    <th width="120px">上次登录时间</th>
+                    <th width="120px">登录IP</th>
+                    <th width="120px">上次登录IP</th>
+                    <th width="70px">状态</th>
+                    <th width="70px">删除</th>
+                    <th width="150px">操作</th>
+                </tr>
+                </thead>
+                <tbody>
+                {foreach $showList as $key=>$vo}
+                    <tr>
+                        <td>{$vo.id}</td>
+                        <td>{$vo.adm_name}</td>
+                        {notempty name="vo.login_time"}
+                            <td>{$vo.login_time|date="Y-m-d H:i"}</td>
+                        {else/}
+                            <td>无</td>
+                        {/notempty}
+                        <td>{notempty name="vo.last_time"}{$vo.last_time|date="Y-m-d H:i"}{else/}无{/notempty}</td>
+                        <td>{notempty name="vo.login_ip"}{$vo.login_ip}{else/}无{/notempty}</td>
+                        <td>{notempty name="vo.last_ip"}{$vo.last_ip}{else/}无{/notempty}</td>
+                        <td>{$vo.is_effect}</td>
+                        <td>{$vo.is_delete}</td>
+                        <td class="td-manage">
+                            {if $vo['adm_name'] neq $defaultAdmin}
+                                <a onClick="adminGiven({$vo.id})"  href="javascript:;" title="权限"  class="btn btn-xs btn-success">权限</a>
+                            {/if}
+							<a onClick="adminUpdate({$vo.id})"  href="javascript:;" title="重置密码"  class="btn btn-xs btn-info">重置</a>
+							<a onClick="adminDel({$vo.id})"  href="javascript:;" title="删除"  class="btn btn-xs btn-warning">删除</a>
+                        </td>
+                    </tr>
+                {/foreach}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!--添加管理员-->
+<div id="add_administrator_style" class="add_menber" style="display:none">
+    <form id="addAdminForm">
+    <div class="form-group">
+        <label class="form-label"><span class="c-red">*</span>登录名：</label>
+        <div class="formControls">
+            <input type="text" class="input-text" value="" placeholder="" id="adm_name" name="adm_name">
+        </div>
+        <div class="col-4"> <span class="Validform_checktip"></span></div>
+    </div>
+    <div class="form-group">
+        <label class="form-label"><span class="c-red">*</span>初始密码：</label>
+        <div class="formControls">
+            <input type="password" placeholder="" name="adm_password" autocomplete="off" value="" class="input-text" id="adm_password">
+        </div>
+        <div class="col-4"> <span class="Validform_checktip"></span></div>
+    </div>
+    </form>
+</div>
+
+<!-- 权限设置 -->
+<div class="ibox-content" id="givenTreeStyle" style="display:none">
+    <div id="treeDemo" class="ztree"></div>
+</div>
+
+</body>
+</html>
+
+<script type="text/javascript">
+
+    //权限树
+    var setting = {
+        view: {
+            dblClickExpand: false,
+            showLine: false,
+            selectedMulti: false
+        },
+        data: {
+            simpleData: {
+                enable:true,
+                idKey: "id",
+                pIdKey: "pId",
+                rootPId: ""
+            }
+        },
+        check: {
+            enable: true,
+            chkStyle: "checkbox",
+            chkboxType: { "Y": "ps", "N": "ps" }
+        },
+        callback: {
+            beforeClick: function(treeId, treeNode) {
+                var zTree = $.fn.zTree.getZTreeObj("tree");
+                if (treeNode.isParent) {
+                    zTree.expandNode(treeNode);
+                    return false;
+                } else {
+                    demoIframe.attr("src",treeNode.file + ".html");
+                    return true;
+                }
+            },
+        }
+    };
+
+    $(function() {
+        $("#administrator").fix({
+            float : 'left',
+            //minStatue : true,
+            skin : 'green',
+            durationTime :false,
+            spacingw:50,//设置隐藏时的距离
+            spacingh:270,//设置显示时间距
+        });
+    });
+
+    //初始化宽度、高度
+    $(".widget-box").height($(window).height()-215);
+    $(".table_menu_list").width($(window).width()-260);
+    $(".table_menu_list").height($(window).height()-215);
+    //当文档窗口发生改变时 触发
+    $(window).resize(function(){
+        $(".widget-box").height($(window).height()-215);
+        $(".table_menu_list").width($(window).width()-260);
+        $(".table_menu_list").height($(window).height()-215);
+    })
+
+    /*添加管理员*/
+    $('#administrator_add').on('click', function(){
+        layer.open({
+            type: 1,
+            title:'添加管理员',
+            area: ['500px',''],
+            shadeClose: false,
+            content: $('#add_administrator_style'),
+            btn:['保存', '取消'],
+            yes:function(){
+                $.post("admin", $("#addAdminForm").serialize(), function(res) {
+                    if (res.code) {
+						layer.alert(
+							res.message,
+							{title: '提示框', icon:2,},
+							function(){
+								//location.reload();
+								window.location.reload();
+							}
+						);
+                    } else {
+                        layer.alert(res.message, {title: '提示框', icon:2,});
+                    }
+                }, "json");
+            }
+        });
+    });
+
+    function adminUpdate(id) {
+        layer.confirm('确认要重置该管理员密码？',function(index) {
+            $.post("admin/"+id, {'_method':'PUT'}, function(res) {
+                if (res.code) {
+                    layer.msg(
+						res.message,
+						{icon:2, time:1000},
+						function() {
+							layer.close(index);
+						}
+					);
+                } else {
+                    layer.msg(res.message, {icon:2, time:1000});
+                }
+            });
+        });
+    }
+
+    function adminDel(id) {
+        layer.confirm('确认要删除该管理员吗？',function(index){
+            $.post("admin", {id:id, '_method':'DELETE'}, function(res) {
+                if (res.code) {
+					layer.msg(
+						res.message,
+						{icon:2, time:1000},
+						function() {
+							//location.reload();
+							window.location.reload();
+						}
+					);
+                } else {
+                    layer.msg(res.message, {icon:2, time:1000});
+                }
+            });
+        });
+    }
+
+    function adminGiven(id) {
+        $.get("roles/"+id, {}, function(res) {
+            var t = $("#treeDemo");
+            t = $.fn.zTree.init(t, setting, res.data);
+            var zTree = $.fn.zTree.getZTreeObj("tree");
+        });
+
+        layer.open({
+            type: 1,
+            title:'权限设置',
+            area: ['500px','500px'],
+            shadeClose: false,
+            content: $('#givenTreeStyle'),
+            btn:['保存', '取消'],
+            yes:function(index){
+                var treeObj = $.fn.zTree.getZTreeObj("treeDemo"),
+                    nodes = treeObj.getCheckedNodes(true),
+                    given = "";
+                for(var i=0;i<nodes.length;i++){
+                    given += nodes[i].id + ","; //获取选中节点的值
+                }
+                $.post("roles/"+id, {
+                    given: given.substring(0, given.length-1),
+                    id: id,
+                    _method: 'PUT'
+                } ,function(res) {
+                    if (res.code) {
+						layer.alert(
+							res.message, 
+							{title: '提示框', icon:2,},
+							function(index2) {
+								layer.close(index2);
+								layer.close(index);
+							}
+						);
+                    } else {
+                        layer.alert(res.message, {title: '提示框', icon:2,});
+                    }
+                });
+            }
+        });
+    }
+</script>
+
+<script type="text/javascript">
+    jQuery(function($) {
+        var oTable1 = $('#sample-table').dataTable( {
+            "bSort": false,
+            "bStateSave": true,//状态保存
+            "aoColumnDefs": [
+                //{"bVisible": false, "aTargets": [ 3 ]} //控制列的隐藏显示
+                {"orderable":false,"aTargets":[0,2,3,4]}// 制定列不参与排序
+            ] } );
+
+        $('[data-rel="tooltip"]').tooltip({placement: tooltip_placement});
+        function tooltip_placement(context, source) {
+            var $source = $(source);
+            var $parent = $source.closest('table')
+            var off1 = $parent.offset();
+            var w1 = $parent.width();
+
+            var off2 = $source.offset();
+            var w2 = $source.width();
+
+            if( parseInt(off2.left) < parseInt(off1.left) + parseInt(w1 / 2) ) return 'right';
+            return 'left';
+        }
+    })
+</script>
+
+
