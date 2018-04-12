@@ -64,8 +64,12 @@ class Roles extends BaseController
     public function read($id)
     {
 		$map = RolesService::maps(['id' => $id]);
+		
+		// checked 节点
         $sGiven = RolesService::getInfoField($map, 'given');
 		$sGiven = explode(',', $sGiven);
+		
+		// 所有节点
         $aMenu = RolesService::getInfoList('', '', '', 'id asc');
 		
 		// 创建节点

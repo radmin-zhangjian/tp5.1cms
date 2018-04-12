@@ -155,7 +155,7 @@ return [
 	'load_ext_config' => 'define',
 	// admin key
 	'admin_key' => 'KJS*^)DG%S^S*F+_SA#D$GH^S%',
-	// admin default pwd
+	// 默认重置密码
 	'admin_default_pwd' => '123456',
 	// 默认管理员
 	'default_admin' => 'root_admin',
