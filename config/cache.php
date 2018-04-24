@@ -37,7 +37,7 @@ return [
     'redis'	=>	[
       'type'	=>	'redis',
       'host'	=>	'127.0.0.1',
-      'password'    => 'zjj@123456',
+      'password'    => '',
       // redis端口
       'port'       => 6379,
       // 全局缓存有效期（0为永久有效）

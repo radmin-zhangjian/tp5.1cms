@@ -29,5 +29,5 @@ return [
     // redis端口
     'port'       => 6379,
     // 密码
-    'password'   => 'zjj@123456',
+    'password'   => '',
 ];
